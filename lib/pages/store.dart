@@ -7,7 +7,7 @@ void main() {
 
 // Widget Flutter (State: Stateless)
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
 
 // Widget Flutter (State: Stateful)
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -189,13 +189,13 @@ class PokemonCategory extends StatefulWidget {
   final Function(Map) onCategorySelected;
 
   const PokemonCategory({
-    Key? key,
+    super.key,
     required this.icon,
     required this.color,
     required this.text,
     this.type,
     required this.onCategorySelected,
-  }) : super(key: key);
+  });
 
   @override
   State<PokemonCategory> createState() => _PokemonCategoryState();
@@ -309,13 +309,13 @@ class PokemonItem extends StatelessWidget {
   final String type;
 
   const PokemonItem({
-    Key? key,
+    super.key,
     required this.name,
     required this.price,
     required this.imageUrl,
     required this.rating,
     required this.type,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

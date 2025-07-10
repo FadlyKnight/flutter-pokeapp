@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-
-void main() {
-  runApp(LoginPage());
-}
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,21 +10,80 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   String _emailInput = '';
+  String _passwordInput = '';
+  bool _isLoading = false;
 
-  // Controller untuk EditText/TextField
-  final TextEditingController _searchController = TextEditingController();
+  // Controllers for text fields
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // Firebase Auth instance
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void dispose() {
-    _searchController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  void _updateSearchQuery(String text) {
+  void _updateEmailInput(String text) {
     setState(() {
       _emailInput = text;
     });
-    print('Searching for: $_emailInput');
+  }
+
+  void _updatePasswordInput(String text) {
+    setState(() {
+      _passwordInput = text;
+    });
+  }
+
+  // Method to handle login
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Sign in with email and password
+      final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: _emailInput,
+        password: _passwordInput,
+      );
+      
+      // If login is successful
+      if (userCredential.user != null) {
+        Navigator.pushReplacementNamed(context, '/');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Selamat Datang, $_emailInput'),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'An error occurred during login';
+      
+      if (e.code == 'user-not-found') {
+        errorMessage = 'No user found for that email';
+      } else if (e.code == 'wrong-password') {
+        errorMessage = 'Wrong password provided';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'Invalid email format';
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -70,8 +126,8 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 30.0),
               TextField(
-                controller: _searchController,
-                onChanged: _updateSearchQuery,
+                controller: _emailController,
+                onChanged: _updateEmailInput,
                 decoration: InputDecoration(
                   hintText: 'Email',
                   suffixIcon: Icon(Icons.email),
@@ -82,7 +138,9 @@ class _LoginPageState extends State<LoginPage> {
               ),
               SizedBox(height: 20.0),
               TextField(
+                controller: _passwordController,
                 obscureText: true,
+                onChanged: _updatePasswordInput,
                 decoration: InputDecoration(
                   hintText: 'Password',
                   suffixIcon: Icon(Icons.visibility_off),
@@ -97,7 +155,13 @@ class _LoginPageState extends State<LoginPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Forget password?', style: TextStyle(fontSize: 12.0)),
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate to reset password page
+                        // Add this functionality later
+                      },
+                      child: Text('Forget password?', style: TextStyle(fontSize: 12.0)),
+                    ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
@@ -106,15 +170,16 @@ class _LoginPageState extends State<LoginPage> {
                           vertical: 8,
                         ),
                       ),
-                      child: const Text('Login'),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Selamat Datang, $_emailInput'),
-                          ),
-                        );
-                      },
+                      onPressed: _isLoading ? null : _login,
+                      child: _isLoading 
+                          ? SizedBox(
+                              width: 20, 
+                              height: 20, 
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ))
+                          : const Text('Login'),
                     ),
                   ],
                 ),
@@ -122,10 +187,7 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 20.0),
               GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, '/');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Selamat Datang, $_emailInput')),
-                  );
+                  Navigator.pushNamed(context, '/signup');
                 },
                 child: Text.rich(
                   TextSpan(
