@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "552537737977",
+    "project_id": "pokeshop-app-e167d",
+    "storage_bucket": "pokeshop-app-e167d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:552537737977:android:f085735c1b9db94e0d3028",
+        "android_client_info": {
+          "package_name": "com.example.fluter_numiii_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXl_8AA_RyN06ucyARWk15VMVBseESMLg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
