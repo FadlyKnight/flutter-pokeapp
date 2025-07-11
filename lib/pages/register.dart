@@ -3,13 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  final VoidCallback? onNavigateToLogin;
+  
+  const RegisterPage({Key? key, this.onNavigateToLogin}) : super(key: key);
 
   @override
-  _RegisterPageState createState() => _RegisterPageState();
+  RegisterPageState createState() => RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -51,7 +53,11 @@ class _RegisterPageState extends State<RegisterPage> {
         
         // Navigate to home page or login page after successful registration
         if (mounted) {
-          Navigator.of(context).pop(); // Go back to login page
+          if (widget.onNavigateToLogin != null) {
+            widget.onNavigateToLogin!();
+          } else {
+            Navigator.of(context).pop(); // Go back to login page
+          }
           // You can also navigate to home page directly if needed
           // Navigator.of(context).pushReplacementNamed('/home');
         }
@@ -212,7 +218,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Go back to login page
+                    if (widget.onNavigateToLogin != null) {
+                      widget.onNavigateToLogin!();
+                    } else {
+                      Navigator.of(context).pop(); // Fallback to pop
+                    }
                   },
                   child: const Text('Already have an account? Login'),
                 ),

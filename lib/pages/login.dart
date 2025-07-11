@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final VoidCallback? onNavigateToRegister;
+  
+  const LoginPage({super.key, this.onNavigateToRegister});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   String _emailInput = '';
   String _passwordInput = '';
   bool _isLoading = false;
@@ -292,8 +294,13 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(height: 20.0),
                 GestureDetector(
                     onTap: () {
-                      // Navigate to signup page
-                      Navigator.pushNamed(context, '/register');
+                      // Use callback to navigate to register page
+                      if (widget.onNavigateToRegister != null) {
+                        widget.onNavigateToRegister!();
+                      } else {
+                        // Fallback to named route if callback is not provided
+                        Navigator.pushNamed(context, '/register');
+                      }
                   },
                   child: Text.rich(
                     TextSpan(

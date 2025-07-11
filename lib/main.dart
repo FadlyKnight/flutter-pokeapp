@@ -18,6 +18,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Pokemon Shop',
+      theme: ThemeData(primarySwatch: Colors.red, fontFamily: 'Poppins'),
       home: const BaseLayout(), // Root-nya langsung ke layout
     );
   }

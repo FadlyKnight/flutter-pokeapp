@@ -4,6 +4,7 @@ import '../pages/login.dart';
 import '../pages/store.dart';
 import '../pages/listSearch.dart';
 import '../pages/cart.dart';
+import '../pages/register.dart';
 
 class BaseLayout extends StatefulWidget {
   const BaseLayout({super.key});
@@ -16,12 +17,19 @@ class _BaseLayoutState extends State<BaseLayout> {
   int _currentIndex = 0;
 
   // List of pages to display in the body of the Scaffold
-  final List<Widget> _pages = const [
-    HomePage(),
-    ListSearchPage(),
-    CartPage(),
-    LoginPage(),
-  ];
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      const HomePage(),
+      const ListSearchPage(),
+      const CartPage(),
+      LoginPage(onNavigateToRegister: () => _onTabTapped(4)),
+      RegisterPage(onNavigateToLogin: () => _onTabTapped(3)),
+    ];
+  }
 
   // function to handle tab changes
   void _onTabTapped(int index) {
@@ -62,7 +70,7 @@ class _BaseLayoutState extends State<BaseLayout> {
       body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: _currentIndex,
+        currentIndex: _currentIndex > 3 ? 3 : _currentIndex, // Clamp to valid tab indices
         selectedItemColor: Colors.red,
         unselectedItemColor: Colors.grey,
         onTap: _onTabTapped,

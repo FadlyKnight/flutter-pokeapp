@@ -1,24 +1,4 @@
 import 'package:flutter/material.dart';
-import 'login.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-// Widget Flutter (State: Stateless)
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Pokemon Shop',
-      theme: ThemeData(primarySwatch: Colors.red, fontFamily: 'Poppins'),
-      home: const HomePage(),
-    );
-  }
-}
 
 // Widget Flutter (State: Stateful)
 class HomePage extends StatefulWidget {
