@@ -605,7 +605,7 @@ class _FeaturedPokemonState extends State<FeaturedPokemon> {
                   ),
                 ),
                 child: const Text(
-                  'Beli Sekarang',
+                  'Beli',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
