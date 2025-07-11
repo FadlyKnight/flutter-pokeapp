@@ -12,6 +12,8 @@ class _LoginPageState extends State<LoginPage> {
   String _emailInput = '';
   String _passwordInput = '';
   bool _isLoading = false;
+  bool _isLoggedIn = false;
+  User? _currentUser;
 
   // Controllers for text fields
   final TextEditingController _emailController = TextEditingController();
@@ -19,6 +21,24 @@ class _LoginPageState extends State<LoginPage> {
 
   // Firebase Auth instance
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if user is already logged in
+    _checkCurrentUser();
+  }
+
+  void _checkCurrentUser() {
+    final User? user = _auth.currentUser;
+    if (user != null) {
+      setState(() {
+        _isLoggedIn = true;
+        _currentUser = user;
+        _emailInput = user.email ?? '';
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -54,7 +74,11 @@ class _LoginPageState extends State<LoginPage> {
       
       // If login is successful
       if (userCredential.user != null) {
-        Navigator.pushReplacementNamed(context, '/');
+        setState(() {
+          _isLoggedIn = true;
+          _currentUser = userCredential.user;
+        });
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Selamat Datang, $_emailInput'),
@@ -78,6 +102,39 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Method to handle logout
+  Future<void> _logout() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _auth.signOut();
+      setState(() {
+        _isLoggedIn = false;
+        _currentUser = null;
+        _emailInput = '';
+        _passwordInput = '';
+        _emailController.clear();
+        _passwordController.clear();
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Successfully logged out'),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error during logout: ${e.toString()}')),
       );
     } finally {
       setState(() {
@@ -115,8 +172,8 @@ class _LoginPageState extends State<LoginPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(
-                      'Login',
-                      style: TextStyle(
+                      _isLoggedIn ? 'Account' : 'Login',
+                      style: const TextStyle(
                         fontSize: 25.0,
                         fontWeight: FontWeight.bold,
                       ),
@@ -124,83 +181,133 @@ class _LoginPageState extends State<LoginPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 30.0),
-              TextField(
-                controller: _emailController,
-                onChanged: _updateEmailInput,
-                decoration: InputDecoration(
-                  hintText: 'Email',
-                  suffixIcon: Icon(Icons.email),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20.0),
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                onChanged: _updatePasswordInput,
-                decoration: InputDecoration(
-                  hintText: 'Password',
-                  suffixIcon: Icon(Icons.visibility_off),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                ),
-              ),
-              SizedBox(height: 30.0),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        // Navigate to reset password page
-                        // Add this functionality later
-                      },
-                      child: Text('Forget password?', style: TextStyle(fontSize: 12.0)),
-                    ),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 15,
-                          vertical: 8,
+              const SizedBox(height: 30.0),
+              
+              if (_isLoggedIn) ...[
+                // Show user info when logged in
+                Card(
+                  elevation: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(Icons.person, size: 28),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Email: ${_currentUser?.email ?? ""}',
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      onPressed: _isLoading ? null : _login,
-                      child: _isLoading 
-                          ? SizedBox(
-                              width: 20, 
-                              height: 20, 
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ))
-                          : const Text('Login'),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 10,
+                            ),
+                          ),
+                          onPressed: _isLoading ? null : _logout,
+                          icon: const Icon(Icons.logout, color: Colors.white),
+                          label: _isLoading 
+                            ? const SizedBox(
+                                width: 20, 
+                                height: 20, 
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ))
+                            : const Text('Logout', style: TextStyle(color: Colors.white)),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-              SizedBox(height: 20.0),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/signup');
-                },
-                child: Text.rich(
-                  TextSpan(
-                    text: 'Don\'t have an account? ',
+              ] else ...[
+                // Show login form when not logged in
+                TextField(
+                  controller: _emailController,
+                  onChanged: _updateEmailInput,
+                  decoration: InputDecoration(
+                    hintText: 'Email',
+                    suffixIcon: const Icon(Icons.email),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20.0),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  onChanged: _updatePasswordInput,
+                  decoration: InputDecoration(
+                    hintText: 'Password',
+                    suffixIcon: const Icon(Icons.visibility_off),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30.0),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextSpan(
-                        text: 'Signup',
-                        style: TextStyle(color: Color(0xffEE7B23)),
+                      GestureDetector(
+                        onTap: () {
+                          // Navigate to reset password page
+                          // Add this functionality later
+                        },
+                        child: const Text('Forget password?', style: TextStyle(fontSize: 12.0)),
+                      ),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 8,
+                          ),
+                        ),
+                        onPressed: _isLoading ? null : _login,
+                        child: _isLoading 
+                            ? const SizedBox(
+                                width: 20, 
+                                height: 20, 
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ))
+                            : const Text('Login'),
                       ),
                     ],
                   ),
                 ),
-              ),
+                const SizedBox(height: 20.0),
+                GestureDetector(
+                    onTap: () {
+                      // Navigate to signup page
+                      Navigator.pushNamed(context, '/register');
+                  },
+                  child: Text.rich(
+                    TextSpan(
+                      text: 'Don\'t have an account? ',
+                      children: [
+                        TextSpan(
+                          text: 'Signup',
+                          style: TextStyle(color: Color(0xffEE7B23)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
