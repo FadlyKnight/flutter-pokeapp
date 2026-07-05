@@ -9,6 +9,7 @@ import '../../../favorites/domain/favorite_pokemon.dart';
 import '../../../favorites/presentation/widgets/favorite_button.dart';
 import '../../domain/entities/pokemon_detail.dart';
 import '../providers/pokemon_detail_provider.dart';
+import '../widgets/move_ability_sheets.dart';
 import '../widgets/stat_bar.dart';
 import '../widgets/type_chip.dart';
 
@@ -100,7 +101,10 @@ class _DetailBody extends StatelessWidget {
                   spacing: 8,
                   runSpacing: 8,
                   children: detail.abilities
-                      .map((a) => Chip(label: Text(a.replaceAll('-', ' ').capitalize)))
+                      .map((a) => ActionChip(
+                            label: Text(a.replaceAll('-', ' ').capitalize),
+                            onPressed: () => showAbilityDetailSheet(context, a),
+                          ))
                       .toList(),
                 ),
                 const SizedBox(height: 20),
@@ -115,7 +119,10 @@ class _DetailBody extends StatelessWidget {
                   runSpacing: 8,
                   children: detail.moves
                       .take(30)
-                      .map((m) => Chip(label: Text(m.replaceAll('-', ' ').capitalize)))
+                      .map((m) => ActionChip(
+                            label: Text(m.replaceAll('-', ' ').capitalize),
+                            onPressed: () => showMoveDetailSheet(context, m),
+                          ))
                       .toList(),
                 ),
                 const SizedBox(height: 24),

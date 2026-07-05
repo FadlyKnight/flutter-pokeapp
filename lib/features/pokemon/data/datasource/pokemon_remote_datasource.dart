@@ -1,11 +1,15 @@
 import 'package:dio/dio.dart';
 
+import '../models/ability_detail_model.dart';
+import '../models/move_detail_model.dart';
 import '../models/pokemon_detail_model.dart';
 import '../models/pokemon_model.dart';
 
 abstract class PokemonRemoteDataSource {
   Future<List<PokemonModel>> getPokemonList({required int offset, required int limit});
   Future<PokemonDetailModel> getPokemonDetail(String idOrName);
+  Future<MoveDetailModel> getMove(String nameOrId);
+  Future<AbilityDetailModel> getAbility(String nameOrId);
 }
 
 class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
@@ -34,5 +38,17 @@ class PokemonRemoteDataSourceImpl implements PokemonRemoteDataSource {
   Future<PokemonDetailModel> getPokemonDetail(String idOrName) async {
     final response = await _dio.get('/pokemon/$idOrName');
     return PokemonDetailModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<MoveDetailModel> getMove(String nameOrId) async {
+    final response = await _dio.get('/move/$nameOrId');
+    return MoveDetailModel.fromJson(response.data as Map<String, dynamic>);
+  }
+
+  @override
+  Future<AbilityDetailModel> getAbility(String nameOrId) async {
+    final response = await _dio.get('/ability/$nameOrId');
+    return AbilityDetailModel.fromJson(response.data as Map<String, dynamic>);
   }
 }

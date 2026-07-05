@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
 
 import '../../../../core/network/app_exceptions.dart';
+import '../../domain/entities/ability_detail.dart';
+import '../../domain/entities/move_detail.dart';
 import '../../domain/entities/pokemon.dart';
 import '../../domain/entities/pokemon_detail.dart';
 import '../../domain/repositories/pokemon_repository.dart';
@@ -36,9 +38,6 @@ class PokemonRepositoryImpl implements PokemonRepository {
   @override
   Future<PokemonDetail> getPokemonDetail(int id) => _getDetail(id.toString());
 
-  @override
-  Future<PokemonDetail> getPokemonByName(String name) => _getDetail(name);
-
   Future<PokemonDetail> _getDetail(String idOrName) async {
     final cacheKey = 'detail_$idOrName';
     try {
@@ -50,6 +49,34 @@ class PokemonRepositoryImpl implements PokemonRepository {
       if (cached != null) {
         return cached.toEntity();
       }
+      throw _mapDioException(e);
+    }
+  }
+
+  @override
+  Future<MoveDetail> getMoveDetail(String name) async {
+    final cacheKey = 'move_$name';
+    try {
+      final model = await _remote.getMove(name);
+      await _local.cacheMove(cacheKey, model);
+      return model.toEntity();
+    } on DioException catch (e) {
+      final cached = _local.getCachedMove(cacheKey);
+      if (cached != null) return cached.toEntity();
+      throw _mapDioException(e);
+    }
+  }
+
+  @override
+  Future<AbilityDetail> getAbilityDetail(String name) async {
+    final cacheKey = 'ability_$name';
+    try {
+      final model = await _remote.getAbility(name);
+      await _local.cacheAbility(cacheKey, model);
+      return model.toEntity();
+    } on DioException catch (e) {
+      final cached = _local.getCachedAbility(cacheKey);
+      if (cached != null) return cached.toEntity();
       throw _mapDioException(e);
     }
   }

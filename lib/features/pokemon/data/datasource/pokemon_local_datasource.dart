@@ -4,6 +4,8 @@ import 'package:hive/hive.dart';
 
 import '../../../../core/constants/hive_constants.dart';
 import '../../domain/entities/pokemon_stat.dart';
+import '../models/ability_detail_model.dart';
+import '../models/move_detail_model.dart';
 import '../models/pokemon_detail_model.dart';
 import '../models/pokemon_model.dart';
 
@@ -15,6 +17,12 @@ abstract class PokemonLocalDataSource {
 
   Future<void> cachePokemonDetail(String key, PokemonDetailModel detail);
   PokemonDetailModel? getCachedPokemonDetail(String key);
+
+  Future<void> cacheMove(String key, MoveDetailModel move);
+  MoveDetailModel? getCachedMove(String key);
+
+  Future<void> cacheAbility(String key, AbilityDetailModel ability);
+  AbilityDetailModel? getCachedAbility(String key);
 }
 
 class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
@@ -82,4 +90,58 @@ class PokemonLocalDataSourceImpl implements PokemonLocalDataSource {
         'stats': d.stats.map((s) => {'name': s.name, 'baseStat': s.baseStat}).toList(),
         'moves': d.moves,
       };
+
+  @override
+  Future<void> cacheMove(String key, MoveDetailModel move) async {
+    await _detailBox.put(key, jsonEncode({
+          'id': move.id,
+          'name': move.name,
+          'type': move.type,
+          'damageClass': move.damageClass,
+          'power': move.power,
+          'accuracy': move.accuracy,
+          'pp': move.pp,
+          'effect': move.effect,
+        }));
+  }
+
+  @override
+  MoveDetailModel? getCachedMove(String key) {
+    final raw = _detailBox.get(key);
+    if (raw == null) return null;
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return MoveDetailModel(
+      id: decoded['id'] as int,
+      name: decoded['name'] as String,
+      type: decoded['type'] as String,
+      damageClass: decoded['damageClass'] as String,
+      power: decoded['power'] as int?,
+      accuracy: decoded['accuracy'] as int?,
+      pp: decoded['pp'] as int?,
+      effect: decoded['effect'] as String,
+    );
+  }
+
+  @override
+  Future<void> cacheAbility(String key, AbilityDetailModel ability) async {
+    await _detailBox.put(key, jsonEncode({
+          'id': ability.id,
+          'name': ability.name,
+          'effect': ability.effect,
+          'generation': ability.generation,
+        }));
+  }
+
+  @override
+  AbilityDetailModel? getCachedAbility(String key) {
+    final raw = _detailBox.get(key);
+    if (raw == null) return null;
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return AbilityDetailModel(
+      id: decoded['id'] as int,
+      name: decoded['name'] as String,
+      effect: decoded['effect'] as String,
+      generation: decoded['generation'] as String,
+    );
+  }
 }

@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/network/app_exceptions.dart';
-import '../../../../core/utils/debouncer.dart';
 import '../../../../core/widgets/app_empty_view.dart';
 import '../../../../core/widgets/app_error_view.dart';
 import '../../../../core/widgets/shimmer_box.dart';
 import '../providers/pokemon_list_notifier.dart';
-import '../providers/pokemon_search_provider.dart';
 import '../widgets/pokemon_card.dart';
-import '../widgets/type_chip.dart';
 import 'pokemon_detail_page.dart';
 
 class HomePage extends ConsumerStatefulWidget {
@@ -20,9 +16,7 @@ class HomePage extends ConsumerStatefulWidget {
 }
 
 class _HomePageState extends ConsumerState<HomePage> {
-  final _searchController = TextEditingController();
   final _scrollController = ScrollController();
-  final _debouncer = Debouncer();
 
   @override
   void initState() {
@@ -32,9 +26,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     _scrollController.dispose();
-    _debouncer.dispose();
     super.dispose();
   }
 
@@ -44,98 +36,17 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
-  void _onSearchChanged(String value) {
-    _debouncer.run(() => ref.read(searchQueryProvider.notifier).state = value);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final query = ref.watch(searchQueryProvider);
-    final isSearching = query.trim().isNotEmpty;
+    final state = ref.watch(pokemonListProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pokédex')),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Search by name or Pokédex number...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: isSearching
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          ref.read(searchQueryProvider.notifier).state = '';
-                        },
-                      )
-                    : null,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-          Expanded(child: isSearching ? const _SearchResults() : const _PokemonList()),
-        ],
-      ),
+      body: _buildBody(state),
     );
   }
-}
 
-class _SearchResults extends ConsumerWidget {
-  const _SearchResults();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final result = ref.watch(searchResultProvider);
-
-    return result.when(
-      loading: () => ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 3,
-        itemBuilder: (_, __) => const PokemonCardShimmer(),
-      ),
-      error: (error, _) => AppErrorView(
-        exception: error is AppException ? error : const ServerException(),
-      ),
-      data: (detail) {
-        if (detail == null) return const SizedBox.shrink();
-        return ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Card(
-              clipBehavior: Clip.antiAlias,
-              child: ListTile(
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => PokemonDetailPage(id: detail.id)),
-                ),
-                leading: Image.network(detail.imageUrl, width: 56, height: 56, fit: BoxFit.contain),
-                title: Text('#${detail.id} ${detail.name}'),
-                subtitle: Wrap(spacing: 6, children: detail.types.map((t) => TypeChip(type: t)).toList()),
-                trailing: const Icon(Icons.chevron_right),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class _PokemonList extends ConsumerWidget {
-  const _PokemonList();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(pokemonListProvider);
-
+  Widget _buildBody(PokemonListState state) {
     if (state.isLoadingFirstPage) {
       return ListView.builder(
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -158,7 +69,8 @@ class _PokemonList extends ConsumerWidget {
     return RefreshIndicator(
       onRefresh: () => ref.read(pokemonListProvider.notifier).refresh(),
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        controller: _scrollController,
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
         itemCount: state.pokemons.length + (state.hasMore ? 1 : 0),
         itemBuilder: (context, index) {
           if (index >= state.pokemons.length) {

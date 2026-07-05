@@ -6,9 +6,10 @@ import '../../data/datasource/pokemon_local_datasource.dart';
 import '../../data/datasource/pokemon_remote_datasource.dart';
 import '../../data/repository/pokemon_repository_impl.dart';
 import '../../domain/repositories/pokemon_repository.dart';
+import '../../domain/usecases/get_ability_detail.dart';
+import '../../domain/usecases/get_move_detail.dart';
 import '../../domain/usecases/get_pokemon_detail.dart';
 import '../../domain/usecases/get_pokemon_list.dart';
-import '../../domain/usecases/search_pokemon.dart';
 
 final dioProvider = Provider<Dio>((ref) => DioClient().dio);
 
@@ -29,4 +30,5 @@ final pokemonRepositoryProvider = Provider<PokemonRepository>(
 
 final getPokemonListProvider = Provider((ref) => GetPokemonList(ref.watch(pokemonRepositoryProvider)));
 final getPokemonDetailProvider = Provider((ref) => GetPokemonDetail(ref.watch(pokemonRepositoryProvider)));
-final searchPokemonProvider = Provider((ref) => SearchPokemon(ref.watch(pokemonRepositoryProvider)));
+final getMoveDetailProvider = Provider((ref) => GetMoveDetail(ref.watch(pokemonRepositoryProvider)));
+final getAbilityDetailProvider = Provider((ref) => GetAbilityDetail(ref.watch(pokemonRepositoryProvider)));

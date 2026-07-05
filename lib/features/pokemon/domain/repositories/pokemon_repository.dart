@@ -1,3 +1,5 @@
+import '../entities/ability_detail.dart';
+import '../entities/move_detail.dart';
 import '../entities/pokemon.dart';
 import '../entities/pokemon_detail.dart';
 
@@ -8,6 +10,7 @@ abstract class PokemonRepository {
 
   Future<PokemonDetail> getPokemonDetail(int id);
 
-  /// Fetches a single Pokémon by exact name, used by search.
-  Future<PokemonDetail> getPokemonByName(String name);
+  Future<MoveDetail> getMoveDetail(String name);
+
+  Future<AbilityDetail> getAbilityDetail(String name);
 }
