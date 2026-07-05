@@ -1,27 +1,23 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+import 'app.dart';
+import 'core/constants/hive_constants.dart';
 import 'firebase_options.dart';
-import 'layouts/base.dart'; // import halaman login
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  runApp(const MyApp());
-}
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  await Hive.initFlutter();
+  await Future.wait([
+    Hive.openBox<String>(HiveBoxes.favorites),
+    Hive.openBox(HiveBoxes.settings),
+    Hive.openBox<String>(HiveBoxes.pokemonListCache),
+    Hive.openBox<String>(HiveBoxes.pokemonDetailCache),
+  ]);
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Pokemon Shop',
-      theme: ThemeData(primarySwatch: Colors.red, fontFamily: 'Poppins'),
-      home: const BaseLayout(), // Root-nya langsung ke layout
-    );
-  }
+  runApp(const ProviderScope(child: MyApp()));
 }
