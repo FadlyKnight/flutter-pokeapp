@@ -36,6 +36,12 @@ migrate_working_dir/
 # Environment
 .env
 
+# Firebase platform config — contains API keys, fetch your own from the
+# Firebase console (or `flutterfire configure`) and drop it in place; see
+# the matching .example file in each folder.
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+
 # Symbolication related
 app.*.symbols
 

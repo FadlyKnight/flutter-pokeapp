@@ -3,17 +3,17 @@
 <plist version="1.0">
 <dict>
 	<key>API_KEY</key>
-	<string>AIzaSyD7GJvkLKgBg8ahz9bfwbM7EJn1Cc03jmQ</string>
+	<string>your_ios_api_key</string>
 	<key>GCM_SENDER_ID</key>
-	<string>552537737977</string>
+	<string>your_messaging_sender_id</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.fluterNumiiiApp</string>
+	<string>com.example.pokedex</string>
 	<key>PROJECT_ID</key>
-	<string>pokeshop-app-e167d</string>
+	<string>your_project_id</string>
 	<key>STORAGE_BUCKET</key>
-	<string>pokeshop-app-e167d.firebasestorage.app</string>
+	<string>your_storage_bucket</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:552537737977:ios:856dcbbbc7e68d9d0d3028</string>
+	<string>your_ios_app_id</string>
 </dict>
 </plist>
